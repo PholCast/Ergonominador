@@ -1,8 +1,10 @@
 # mqtt_client.py
-import time
 import paho.mqtt.client as paho
 from paho import mqtt
 import threading
+
+# Variable global para el hilo
+mqtt_thread = None
 
 # Callback para conexión
 def on_connect(client, userdata, flags, rc, properties=None):
@@ -21,8 +23,12 @@ def on_message(client, userdata, msg):
     print("Mensaje recibido en tópico:", msg.topic)
     print("Contenido:", msg.payload.decode())
 
-# Configura el cliente MQTT
 def start_mqtt_client():
+    global mqtt_thread
+    if mqtt_thread is not None and mqtt_thread.is_alive():
+        print("El cliente MQTT ya está en ejecución.")
+        return  # No iniciar un nuevo hilo si ya está en ejecución
+
     client = paho.Client(client_id="", userdata=None, protocol=paho.MQTTv5)
     client.on_connect = on_connect
     client.on_publish = on_publish
@@ -45,6 +51,4 @@ def start_mqtt_client():
     # Inicia el bucle de espera de mensajes en segundo plano
     client.loop_forever()
 
-# Inicia el cliente en un hilo
-mqtt_thread = threading.Thread(target=start_mqtt_client)
-mqtt_thread.start()
+    mqtt_thread = threading.current_thread()  # Asigna el hilo actual
