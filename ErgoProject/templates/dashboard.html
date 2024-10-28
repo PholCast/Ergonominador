@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Bienvenido al Dashboard</h1>
+    <div id="alert-container"></div>
+
+    <script>
+        function fetchAlerts() {
+            $.ajax({
+                url: "{% url 'get_alerts' %}",
+                method: "GET",
+                success: function (data) {
+                    const alertContainer = $("#alert-container");
+                    alertContainer.empty();
+                    data.forEach(alert => {
+                        alertContainer.append(`<div><strong>Alerta:</strong> ${alert.message}</div>`);
+                    });
+                },
+                error: function (error) {
+                    console.error("Error al obtener las alertas:", error);
+                }
+            });
+        }
+
+        // Llama a fetchAlerts cada 5 segundos
+        setInterval(fetchAlerts, 5000);
+    </script>
+</body>
+</html>

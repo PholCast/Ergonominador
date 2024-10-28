@@ -3,10 +3,7 @@ from paho import mqtt
 import threading
 import json  # Usaremos JSON si el mensaje viene en formato JSON
 from django.utils import timezone
-from mqttApp.models import SensorLuz, SensorSonido, SensorTemp  # Importamos el modelo
-
-# Variable global para el hilo
-mqtt_thread = None
+from mqttApp.models import SensorLuz, SensorSonido, SensorTemp, Alert  # Importamos el modelo
 
 # Callback para conexión
 def on_connect(client, userdata, flags, rc, properties=None):
@@ -28,19 +25,27 @@ def on_message(client, userdata, message):
     match message.topic:
         case "sensors/temp":
             SensorTemp.objects.create(value=value, date=timezone.now())
+            
         case "sensors/sonido":
             SensorSonido.objects.create(value=value, date=timezone.now())
         case "sensors/luz":
             SensorLuz.objects.create(value=value, date=timezone.now())
+        case "alert/distancia":
+            Alert.objects.create(type_alert="Distancia", message=f"Distancia a la pantalla es muy baja: {value} cm")
+        case "alert/temp":
+            Alert.objects.create(type_alert="Temperatura", message=f"Alerta de Temperatura : {value} grados")
+        case "alert/luz":
+            Alert.objects.create(type_alert="Luz", message=f"Alerta de Luz : {value} lux")
+        case "alert/postura":
+            Alert.objects.create(type_alert="Postura", message=f"Alerta de Postura : {value} si")
         case _:
-            print(f"topic no se encontró o algo así ")
+            print(f"topic no se encontró o algo así")
+
+# Función que ejecutará el loop del cliente MQTT en un hilo separado
+def mqtt_loop(client):
+    client.loop_forever()
 
 def start_mqtt_client():
-    global mqtt_thread
-    if mqtt_thread is not None and mqtt_thread.is_alive():
-        print("El cliente MQTT ya está en ejecución.")
-        return  # No iniciar un nuevo hilo si ya está en ejecución
-
     client = paho.Client(client_id="", userdata=None, protocol=paho.MQTTv5)
     client.on_connect = on_connect
     client.on_publish = on_publish
@@ -54,13 +59,11 @@ def start_mqtt_client():
     # Conecta al broker de HiveMQ
     client.connect("0ef00983738c44e2880d6f556d2fb494.s1.eu.hivemq.cloud", 8883)
 
-    # Suscríbete a un tópico
+    # Suscríbete a los tópicos
     client.subscribe("sensors/#", qos=1)
+    client.subscribe("alert/#", qos=1)
 
-    # Publica un mensaje de prueba
-    #client.publish("encyclopedia/temperature", payload='{ "sensor_id": "sensor1", "value": 24.5 }', qos=1)
-
-    # Inicia el bucle de espera de mensajes en segundo plano
-    client.loop_forever()
-
-    mqtt_thread = threading.current_thread()  # Asigna el hilo actual
+    # Inicia el loop en un hilo separado
+    mqtt_thread = threading.Thread(target=mqtt_loop, args=(client,))
+    mqtt_thread.daemon = True  # Esto permite que el hilo se cierre al terminar el servidor
+    mqtt_thread.start()
