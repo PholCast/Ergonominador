@@ -57,7 +57,7 @@ def start_mqtt_client():
     client.username_pw_set("LeoPol", "leopolleopol")
 
     # Conecta al broker de HiveMQ
-    client.connect("0ef00983738c44e2880d6f556d2fb494.s1.eu.hivemq.cloud", 8883)
+    client.connect("1b8b033ce0f9411d825d2ad28e1b935d.s1.eu.hivemq.cloud", 8883)
 
     # Suscríbete a los tópicos
     client.subscribe("sensors/#", qos=1)

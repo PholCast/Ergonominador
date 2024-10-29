@@ -20,11 +20,17 @@ class SensorSonido(SensorBase):
 class SensorLuz(SensorBase):
     pass
 
-
 class Alert(models.Model):
     type_alert = models.CharField(max_length=50) #Distancia, Postura, Temperatura, luz
     message = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.type_alert} -- {self.message} -- {self.created_at} "
+        return f"{self.type_alert} -- {self.message} -- {self.created_at}"  # Asegúrate de que la cadena esté cerrada
+
+class Postura(models.Model):
+    tiempo = models.IntegerField()
+    semaforo = models.CharField(max_length=10)
+
+    def __str__(self):
+        return f"{self.tiempo}s - {self.semaforo}"
