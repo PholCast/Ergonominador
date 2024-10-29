@@ -6,7 +6,7 @@ class MqttappConfig(AppConfig):
     name = 'mqttApp'
     
 
-    def ready(self):
-        # Importa el cliente MQTT y ejecuta el hilo cuando Django inicia
-        from .mqtt_client import start_mqtt_client
-        start_mqtt_client()  # Llama a la función para iniciar el cliente MQTT
+    # def ready(self):
+    #     # Importa el cliente MQTT y ejecuta el hilo cuando Django inicia
+    #     from .mqtt_client import start_mqtt_client
+    #     start_mqtt_client()  # Llama a la función para iniciar el cliente MQTT
