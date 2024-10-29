@@ -19,16 +19,16 @@ def on_subscribe(client, userdata, mid, granted_qos, properties=None):
 
 def on_message(client, userdata, message):
     # Aquí asumo que el mensaje es un JSON que incluye el sensor_id y el value
-    value = message.payload.decode()
+    value = float(message.payload.decode())
     print("valor enviado :", value)
     # Usamos match para decidir en qué tabla guardar según el sensor_id
     match message.topic:
-        case "sensors/temp":
+        case "sensorsPHOLLEO/temp":
             SensorTemp.objects.create(value=value, date=timezone.now())
             
-        case "sensors/sonido":
+        case "sensorsPHOLLEO/sonido":
             SensorSonido.objects.create(value=value, date=timezone.now())
-        case "sensors/luz":
+        case "sensorsPHOLLEO/luz":
             SensorLuz.objects.create(value=value, date=timezone.now())
         case "alert/distancia":
             Alert.objects.create(type_alert="Distancia", message=f"Distancia a la pantalla es muy baja: {value} cm")
@@ -54,13 +54,13 @@ def start_mqtt_client():
 
     # Configura TLS para conexión segura
     client.tls_set(tls_version=mqtt.client.ssl.PROTOCOL_TLS)
-    client.username_pw_set("LeoPol", "leopolleopol")
+    #client.username_pw_set("LeoPol", "leopolleopol")
 
     # Conecta al broker de HiveMQ
-    client.connect("0ef00983738c44e2880d6f556d2fb494.s1.eu.hivemq.cloud", 8883)
+    client.connect("broker.hivemq.com", 8883)
 
     # Suscríbete a los tópicos
-    client.subscribe("sensors/#", qos=1)
+    client.subscribe("sensorsPHOLLEO/#", qos=1)
     client.subscribe("alert/#", qos=1)
 
     # Inicia el loop en un hilo separado
