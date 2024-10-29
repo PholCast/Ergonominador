@@ -22,6 +22,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('dashboard/', views.dashboard_view, name='dashboard'),  # Vista principal del usuario
     path('get-alerts/', views.get_alerts, name='get_alerts'),
+    path("get-sensor-data/", views.get_sensor_data, name="get_sensor_data"),
+    path("sensors_view/", views.sensors_view, name="sensors_view"),
     path('', views.index, name='index'),  # Ruta principal para index.html
     path('ui-features/buttons/', views.buttons, name='buttons'),
     path('ui-features/dropdowns/', views.dropdowns, name='dropdowns'),

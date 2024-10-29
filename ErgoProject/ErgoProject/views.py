@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from mqttApp.models import Alert
+from mqttApp.models import Alert, SensorLuz, SensorSonido, SensorTemp, Postura
 from django.shortcuts import render
 
 def get_alerts(request):
@@ -10,6 +10,65 @@ def get_alerts(request):
 
 def dashboard_view(request):
     return render(request, "dashboard.html") 
+
+
+# views.py
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models import Sum
+
+
+
+
+"""def get_sensor_data(request):
+    # Obtén los datos de los últimos 5 minutos
+    time_threshold = timezone.now() - timedelta(minutes=5)
+
+    # Datos de cada sensor
+    temp_data = SensorTemp.objects.filter(date__gte=time_threshold).values("date", "value")
+    sonido_data = SensorSonido.objects.filter(date__gte=time_threshold).values("date", "value")
+    luz_data = SensorLuz.objects.filter(date__gte=time_threshold).values("date", "value")
+    
+    # Formatear las fechas y los valores
+    data = {
+        "temp_timestamps": [entry["date"].strftime("%Y-%m-%d %H:%M:%S") for entry in temp_data],
+        "temp_values": [entry["value"] for entry in temp_data],
+        "sonido_timestamps": [entry["date"].strftime("%Y-%m-%d %H:%M:%S") for entry in sonido_data],
+        "sonido_values": [entry["value"] for entry in sonido_data],
+        "luz_timestamps": [entry["date"].strftime("%Y-%m-%d %H:%M:%S") for entry in luz_data],
+        "luz_values": [entry["value"] for entry in luz_data],
+    }
+    return JsonResponse(data)"""
+def get_sensor_data(request):
+    # Obtén los datos de los últimos 5 minutos
+    time_threshold = timezone.now() - timedelta(minutes=5)
+
+    # Datos de cada sensor
+    temp_data = SensorTemp.objects.filter(date__gte=time_threshold).values("date", "value")
+    sonido_data = SensorSonido.objects.filter(date__gte=time_threshold).values("date", "value")
+    luz_data = SensorLuz.objects.filter(date__gte=time_threshold).values("date", "value")
+
+    # Obtener los tiempos del semáforo
+    semaforo_data = Postura.objects.values('semaforo').annotate(total_tiempo=Sum('tiempo'))
+    tiempos = { 'Verde': 0, 'Amarillo': 0, 'Rojo': 0 }
+    for dato in semaforo_data:
+        tiempos[dato['semaforo']] += dato['total_tiempo']
+
+    
+    # Formatear las fechas y los valores
+    response_data = {
+        "temp_timestamps": [entry["date"].strftime("%Y-%m-%d %H:%M:%S") for entry in temp_data],
+        "temp_values": [entry["value"] for entry in temp_data],
+        "sonido_timestamps": [entry["date"].strftime("%Y-%m-%d %H:%M:%S") for entry in sonido_data],
+        "sonido_values": [entry["value"] for entry in sonido_data],
+        "luz_timestamps": [entry["date"].strftime("%Y-%m-%d %H:%M:%S") for entry in luz_data],
+        "luz_values": [entry["value"] for entry in luz_data],
+        'semaforo_tiempos': tiempos,
+    }
+    return JsonResponse(response_data)
+
+def sensors_view(request):
+    return render(request, "get_sensorData.html")
 
 def index(request):
     return render(request, 'index.html')
