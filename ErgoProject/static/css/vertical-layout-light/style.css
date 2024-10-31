@@ -21985,7 +21985,7 @@ code {
 }
 
 .card.tale-bg {
-  background: rgb(245, 247, 255)
+  background: #F5F7FF
 }
 
 .card.transparent {
@@ -22102,6 +22102,24 @@ code {
 
 .card.card-light-blue:hover {
   background: #8f8eed;
+}
+
+.card.card-danger {
+  background: #FF0000;
+  color: #ffffff;
+}
+
+.card.card-danger:hover {
+  background: #FF0000;
+}
+
+.card.card-success {
+  background: #42d442;
+  color: #ffffff;
+}
+
+.card.card-success:hover {
+  background: #42d442;
 }
 
 .card.card-light-danger {

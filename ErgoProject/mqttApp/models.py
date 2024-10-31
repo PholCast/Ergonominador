@@ -31,6 +31,6 @@ class Alert(models.Model):
 class Postura(models.Model):
     tiempo = models.IntegerField()
     semaforo = models.CharField(max_length=10)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(null=True)
     def __str__(self):
         return f"{self.tiempo}s - {self.semaforo}"

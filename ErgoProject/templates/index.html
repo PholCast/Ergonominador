@@ -74,7 +74,6 @@
     <div class="container-fluid page-body-wrapper">
       <!-- partial:partials/_settings-panel.html -->
       <div class="theme-setting-wrapper">
-        <div id="settings-trigger"><i class="ti-settings"></i></div>
         <div id="theme-settings" class="settings-panel">
           <i class="settings-close ti-close"></i>
           <p class="settings-heading">SIDEBAR SKINS</p>
@@ -326,8 +325,8 @@
                   <div class="card card-tale">
                     <div class="card-body">
                       <p class="mb-4">Alertas de Distancia</p>
-                      <p class="fs-30 mb-2">4006</p>
-                      <p>10.00% (30 days)</p>
+                      <p style="font-size: 15px" id="distancia-alerta" class="fs-30 mb-2">4006</p>
+                      <p id = "fecha-distancia">N/A</p>
                     </div>
                   </div>
                 </div>
@@ -335,8 +334,7 @@
                   <div class="card card-dark-blue">
                     <div class="card-body">
                       <p class="mb-4">Distancia a la Pantalla</p>
-                      <p class="fs-30 mb-2">61344</p>
-                      <p>22.00% (30 days)</p>
+                      <p id ="distancia-pantalla" class="fs-30 mb-2">N/A</p>
                     </div>
                   </div>
                 </div>
@@ -345,9 +343,9 @@
                 <div class="col-md-6 mb-4 stretch-card transparent">
                   <div class="card card-tale">
                     <div class="card-body">
-                      <p class="mb-4">Alertas de Temperatura</p>
-                      <p class="fs-30 mb-2">4006</p>
-                      <p>10.00% (30 days)</p>
+                      <p  class="mb-4">Alertas de Temperatura</p>
+                      <p style ="font-size: 15px" id= "temperatura-alerta"  class="fs-30 mb-2">N/A</p>
+                      <p id= "fecha-temperatura" >N/A</p>
                     </div>
                   </div>
                 </div>
@@ -355,19 +353,17 @@
                   <div class="card card-dark-blue">
                     <div class="card-body">
                       <p class="mb-4">Pausas activas realizadas</p>
-                      <p class="fs-30 mb-2">61344</p>
-                      <p>22.00% (30 days)</p>
+                      <p id ="cantidad_pausas" class="fs-30 mb-2">N/A</p>
                     </div>
                   </div>
                 </div>
               </div>
               <div class="row">
                 <div class="col-md-6 mb-4 mb-lg-0 stretch-card transparent">
-                  <div class="card card-light-blue">
+                  <div id= "postura-alerta" class="card card-success">
                     <div class="card-body">
                       <p class="mb-4">Alertas de Postura 🚦</p>
-                      <p class="fs-30 mb-2">34040</p>
-                      <p>2.00% (30 days)</p>
+                      <p style="font-size: 15px" id= "mensaje-postura" class="fs-30 mb-2">Todo en orden, sigue trabajando cómodamente.</p>
                     </div>
                   </div>
                 </div>
@@ -375,8 +371,8 @@
                   <div class="card card-light-danger">
                     <div class="card-body">
                       <p class="mb-4">Alertas de Luz ambiente</p>
-                      <p class="fs-30 mb-2">47033</p>
-                      <p>0.22% (30 days)</p>
+                      <p style="font-size: 15px" id= "luz-alerta" class="fs-30 mb-2">47033</p>
+                      <p id= "fecha-luz">0.22% (30 days)</p>
                     </div>
                   </div>
                 </div>
@@ -400,7 +396,6 @@
                 <div class="card-body">
                  <div class="d-flex justify-content-between">
                   <p class="card-title">Gráfica de temperatura ambiente</p>
-                  <a href="#" class="text-info">View all</a>
                  </div>
                   <p class="font-weight-500">The total number of sessions within the date range. It is the period time a user is actively engaged with your website, page or app, etc</p>
                   <div id="sales-legend" class="chartjs-legend mt-4 mb-2"></div>
@@ -659,6 +654,16 @@ function updateCharts() {
       url: "{% url 'get_sensor_data' %}",
       method: "GET",
       success: function (data) {
+
+          $("#cantidad_pausas").text(data.verde_count);
+          
+          if (data.sonido_values && data.sonido_values.length > 0) {
+            console.log(data.sonido_values);
+            $("#distancia-pantalla").text(data.sonido_values[data.sonido_values.length - 1] + " cm");
+          } else {
+              $("#distancia-pantalla").text("N/A");
+          }
+
           // Actualiza los gráficos de temperatura, sonido y luz
           tempChart.data.labels = data.temp_timestamps;
           tempChart.data.datasets[0].data = data.temp_values;
@@ -693,6 +698,58 @@ setInterval(updateCharts, 5000);
 
 // Llama a updateCharts al cargar la página por primera vez
 updateCharts();
+</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  function fetchLatestAlerts() {
+      $.ajax({
+          url: "{% url 'get_alerts' %}", // Asegúrate de que 'get_alerts' sea la URL correcta en tus rutas de Django
+          method: "GET",
+          success: function(data) {
+              // Verifica si existe una alerta de "Postura"
+              if (data.Postura) {
+                const semaforo = data.Postura.semaforo;
+                const posturaMensajeDiv = $("#postura-alerta");
+                const posturaMensajeText = $("#mensaje-postura");
+
+                // Cambiar el color de fondo y el mensaje dependiendo del semáforo
+                if (semaforo === "Amarillo") {
+                    posturaMensajeDiv.removeClass().addClass("card card-light-blue");
+                    posturaMensajeText.text("Precaución / Advertencia: Es momento de hacer una pausa y cambiar de posición.");
+                } else if (semaforo === "Rojo") {
+                    posturaMensajeDiv.removeClass().addClass("card card-danger"); // Cambia a la clase correspondiente para rojo
+                    posturaMensajeText.text("Atención urgente: Necesitas cambiar de postura o tomar un descanso inmediato.");
+                } else if (semaforo === "Verde") {
+                    posturaMensajeDiv.removeClass().addClass("card card-success"); // Cambia a la clase correspondiente para verde
+                    posturaMensajeText.text("Todo en orden, sigue trabajando cómodamente.");
+                }
+            }
+
+              // Verifica si existe una alerta de "Distancia" y actualiza el contenido del <p> correspondiente
+              if (data.Distancia) {
+                  $("#distancia-alerta").text(data.Distancia.message);
+                  $("#fecha-distancia").text(data.Distancia.created_at);
+              }
+
+              // Verifica si existe una alerta de "Temperatura"
+              if (data.Temperatura) {
+                  $("#temperatura-alerta").text(data.Temperatura.message);
+                  $("#fecha-temperatura").text(data.Temperatura.created_at);
+              }
+
+              // Verifica si existe una alerta de "Luz"
+              if (data.Luz) {
+                  $("#luz-alerta").text(data.Luz.message);
+                  $("#fecha-luz").text(data.Luz.created_at);
+              }
+          },
+          error: function(error) {
+              console.error("Error al obtener las alertas:", error);
+          }
+      });
+  }
+  // Llama a fetchLatestAlerts cada 5 segundos
+  setInterval(fetchLatestAlerts, 5000);
 </script>
 </body>
 </html>

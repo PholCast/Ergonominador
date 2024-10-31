@@ -1,7 +1,9 @@
 from django.http import JsonResponse
 from mqttApp.models import Alert, SensorLuz, SensorSonido, SensorTemp, Postura
 from django.shortcuts import render
-from django.db.models import Max
+from django.db.models import Max, Sum
+from datetime import datetime, timedelta
+
 # def get_alerts(request):
 #     # Aquí podríamos filtrar por alertas recientes si es necesario
 #     alerts = Alert.objects.order_by('-created_at')[:10]  # Últimas 10 alertas
@@ -17,27 +19,32 @@ def get_alerts(request):
         created_at__in=[alert['latest_created_at'] for alert in latest_alerts]
     )
 
+    # Obtener la última entrada de Postura
+    latest_postura = Postura.objects.order_by('-created_at').first()
+
     # Serializar los datos para cada alerta en el formato requerido
     alert_data = {
         alert.type_alert: {
             "type_alert": alert.type_alert,
             "message": alert.message,
-            "created_at": alert.created_at
+            "created_at": alert.created_at.strftime("%H:%M:%S")
         }
         for alert in alerts
     }
 
+    # Agregar la última postura si existe usando los campos del modelo
+    if latest_postura:
+        alert_data['Postura'] = {
+            "tiempo": latest_postura.tiempo,
+            "semaforo": latest_postura.semaforo,
+            "created_at": latest_postura.created_at.strftime("%H:%M:%S")
+        }
+
     return JsonResponse(alert_data, safe=False)
+
 
 def dashboard_view(request):
     return render(request, "dashboard.html") 
-
-
-# views.py
-from django.utils import timezone
-from datetime import timedelta
-from django.db.models import Sum
-
 
 
 
@@ -60,9 +67,10 @@ from django.db.models import Sum
         "luz_values": [entry["value"] for entry in luz_data],
     }
     return JsonResponse(data)"""
+    
 def get_sensor_data(request):
     # Obtén los datos de los últimos 5 minutos
-    time_threshold = timezone.now() - timedelta(minutes=5)
+    time_threshold = time_threshold = datetime.now() - timedelta(minutes=5)
 
     # Datos de cada sensor
     temp_data = SensorTemp.objects.filter(date__gte=time_threshold).values("date", "value")
@@ -72,10 +80,14 @@ def get_sensor_data(request):
     # Obtener los tiempos del semáforo
     semaforo_data = Postura.objects.values('semaforo').annotate(total_tiempo=Sum('tiempo'))
     tiempos = { 'Verde': 0, 'Amarillo': 0, 'Rojo': 0 }
+    
+    verde_count = 0  # Inicializa el contador para semáforos en verde
+
     for dato in semaforo_data:
         tiempos[dato['semaforo']] += dato['total_tiempo']
-
-    
+        if dato['semaforo'] == 'Verde':
+            verde_count += 1  # Incrementa el contador si el semáforo es verde
+    print(verde_count)
     # Formatear las fechas y los valores
     response_data = {
         "temp_timestamps": [entry["date"].strftime("%Y-%m-%d %H:%M:%S") for entry in temp_data],
@@ -85,6 +97,7 @@ def get_sensor_data(request):
         "luz_timestamps": [entry["date"].strftime("%Y-%m-%d %H:%M:%S") for entry in luz_data],
         "luz_values": [entry["value"] for entry in luz_data],
         'semaforo_tiempos': tiempos,
+        'verde_count': verde_count-1,  # Añadir el conteo de semáforos en verde
     }
     return JsonResponse(response_data)
 

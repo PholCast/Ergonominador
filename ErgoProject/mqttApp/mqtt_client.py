@@ -23,32 +23,34 @@ def on_message(client, userdata, message):
     value = float(message.payload.decode())
     print("valor enviado :", value)
     
-    
     system_time = datetime.now()  # Obtiene la hora del sistema
     print(system_time)
     # Usamos match para decidir en qué tabla guardar según el sensor_id
     match message.topic:
         case "sensorsPHOLLEO/temp":
             SensorTemp.objects.create(value=value, date=system_time)
-            
         case "sensorsPHOLLEO/sonido":
             SensorSonido.objects.create(value=value, date=system_time)
         case "sensorsPHOLLEO/luz":
             SensorLuz.objects.create(value=value, date=system_time)
         case "alertPHOLLEO/distancia":
-            Alert.objects.create(created_at=system_time,type_alert="Distancia", message=f"Distancia a la pantalla es muy baja: {value} cm")
+            Alert.objects.create(created_at=system_time,type_alert="Distancia", message=f"¡Distancia a la pantalla es muy baja!")
         case "alertPHOLLEO/temp":
             if value > 30:
-                Alert.objects.create(created_at=system_time,type_alert="Temperatura", message=f"Alerta: la temperatura es muy alta! ( {value} grados )")
+                Alert.objects.create(created_at=system_time,type_alert="Temperatura", message=f"¡La temperatura es muy alta! : {value}°C")
             else:
-                Alert.objects.create(created_at=system_time,type_alert="Temperatura", message=f"Alerta: la temperatura es muy baja! ( {value} grados )")
+                Alert.objects.create(created_at=system_time,type_alert="Temperatura", message=f"¡La temperatura es muy baja! : {value}°C")
         case "alertPHOLLEO/luz":
             if value < 20:
-                Alert.objects.create(created_at=system_time,type_alert="Luz", message=f"Alerta: la luz ambiente es muy baja!( {value} lux )")
+                Alert.objects.create(created_at=system_time,type_alert="Luz", message=f"¡La luz ambiente es muy baja!")
             else:
-                Alert.objects.create(created_at=system_time,type_alert="Luz", message=f"Alerta: la luz ambiente esd muy alta!( {value} lux )")
-        case "alertPHOLLEO/postura":
-            Postura.objects.create(created_at=system_time,tiempo=value, semaforo=f"{value}")
+                Alert.objects.create(created_at=system_time,type_alert="Luz", message=f"¡La luz ambiente es muy alta!")
+        case "alertPHOLLEO/postura/Verde":
+            Postura.objects.create(created_at=system_time,tiempo=value, semaforo="Verde")
+        case "alertPHOLLEO/postura/Amarillo":
+            Postura.objects.create(created_at=system_time,tiempo=value, semaforo="Amarillo")
+        case "alertPHOLLEO/postura/Rojo":
+            Postura.objects.create(created_at=system_time,tiempo=value, semaforo="Rojo")
         case _:
             print(f"topic no se encontró o algo así")
 
