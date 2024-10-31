@@ -1,11 +1,32 @@
 from django.http import JsonResponse
 from mqttApp.models import Alert, SensorLuz, SensorSonido, SensorTemp, Postura
 from django.shortcuts import render
+from django.db.models import Max
+# def get_alerts(request):
+#     # Aquí podríamos filtrar por alertas recientes si es necesario
+#     alerts = Alert.objects.order_by('-created_at')[:10]  # Últimas 10 alertas
+#     alert_data = [{"type_alert": alert.type_alert, "message": alert.message, "created_at": alert.created_at} for alert in alerts]
+#     return JsonResponse(alert_data, safe=False)
 
 def get_alerts(request):
-    # Aquí podríamos filtrar por alertas recientes si es necesario
-    alerts = Alert.objects.order_by('-created_at')[:10]  # Últimas 10 alertas
-    alert_data = [{"type_alert": alert.type_alert, "message": alert.message, "created_at": alert.created_at} for alert in alerts]
+    # Obtener la última alerta de cada tipo usando Max sobre el campo `created_at`
+    latest_alerts = Alert.objects.values('type_alert').annotate(latest_created_at=Max('created_at'))
+    
+    # Filtrar las alertas para obtener los detalles completos de las últimas de cada tipo
+    alerts = Alert.objects.filter(
+        created_at__in=[alert['latest_created_at'] for alert in latest_alerts]
+    )
+
+    # Serializar los datos para cada alerta en el formato requerido
+    alert_data = {
+        alert.type_alert: {
+            "type_alert": alert.type_alert,
+            "message": alert.message,
+            "created_at": alert.created_at
+        }
+        for alert in alerts
+    }
+
     return JsonResponse(alert_data, safe=False)
 
 def dashboard_view(request):

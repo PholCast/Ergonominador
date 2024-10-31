@@ -3,7 +3,8 @@ from paho import mqtt
 import threading
 import json  # Usaremos JSON si el mensaje viene en formato JSON
 from django.utils import timezone
-from mqttApp.models import SensorLuz, SensorSonido, SensorTemp, Alert  # Importamos el modelo
+from mqttApp.models import Postura,SensorLuz, SensorSonido, SensorTemp, Alert  # Importamos el modelo
+from datetime import datetime  # Importa datetime
 
 # Callback para conexión
 def on_connect(client, userdata, flags, rc, properties=None):
@@ -21,23 +22,33 @@ def on_message(client, userdata, message):
     # Aquí asumo que el mensaje es un JSON que incluye el sensor_id y el value
     value = float(message.payload.decode())
     print("valor enviado :", value)
+    
+    
+    system_time = datetime.now()  # Obtiene la hora del sistema
+    print(system_time)
     # Usamos match para decidir en qué tabla guardar según el sensor_id
     match message.topic:
         case "sensorsPHOLLEO/temp":
-            SensorTemp.objects.create(value=value, date=timezone.now())
+            SensorTemp.objects.create(value=value, date=system_time)
             
         case "sensorsPHOLLEO/sonido":
-            SensorSonido.objects.create(value=value, date=timezone.now())
+            SensorSonido.objects.create(value=value, date=system_time)
         case "sensorsPHOLLEO/luz":
-            SensorLuz.objects.create(value=value, date=timezone.now())
-        case "alert/distancia":
-            Alert.objects.create(type_alert="Distancia", message=f"Distancia a la pantalla es muy baja: {value} cm")
-        case "alert/temp":
-            Alert.objects.create(type_alert="Temperatura", message=f"Alerta de Temperatura : {value} grados")
-        case "alert/luz":
-            Alert.objects.create(type_alert="Luz", message=f"Alerta de Luz : {value} lux")
-        case "alert/postura":
-            Alert.objects.create(type_alert="Postura", message=f"Alerta de Postura : {value} si")
+            SensorLuz.objects.create(value=value, date=system_time)
+        case "alertPHOLLEO/distancia":
+            Alert.objects.create(created_at=system_time,type_alert="Distancia", message=f"Distancia a la pantalla es muy baja: {value} cm")
+        case "alertPHOLLEO/temp":
+            if value > 30:
+                Alert.objects.create(created_at=system_time,type_alert="Temperatura", message=f"Alerta: la temperatura es muy alta! ( {value} grados )")
+            else:
+                Alert.objects.create(created_at=system_time,type_alert="Temperatura", message=f"Alerta: la temperatura es muy baja! ( {value} grados )")
+        case "alertPHOLLEO/luz":
+            if value < 20:
+                Alert.objects.create(created_at=system_time,type_alert="Luz", message=f"Alerta: la luz ambiente es muy baja!( {value} lux )")
+            else:
+                Alert.objects.create(created_at=system_time,type_alert="Luz", message=f"Alerta: la luz ambiente esd muy alta!( {value} lux )")
+        case "alertPHOLLEO/postura":
+            Postura.objects.create(created_at=system_time,tiempo=value, semaforo=f"{value}")
         case _:
             print(f"topic no se encontró o algo así")
 
@@ -61,7 +72,7 @@ def start_mqtt_client():
 
     # Suscríbete a los tópicos
     client.subscribe("sensorsPHOLLEO/#", qos=1)
-    client.subscribe("alert/#", qos=1)
+    client.subscribe("alertPHOLLEO/#", qos=1)
 
     # Inicia el loop en un hilo separado
     mqtt_thread = threading.Thread(target=mqtt_loop, args=(client,))

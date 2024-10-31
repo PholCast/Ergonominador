@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+{% comment %} <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -21,6 +21,56 @@
                     data.forEach(alert => {
                         alertContainer.append(`<div><strong>Alerta:</strong> ${alert.message}</div>`);
                     });
+                },
+                error: function (error) {
+                    console.error("Error al obtener las alertas:", error);
+                }
+            });
+        }
+
+        // Llama a fetchAlerts cada 5 segundos
+        setInterval(fetchAlerts, 5000);
+    </script>
+</body>
+</html> {% endcomment %}
+
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <h1>Bienvenido al Dashboard</h1>
+
+    <!-- Contenedores específicos para cada tipo de alerta -->
+    <div id="alert-temperatura"><strong>Temperatura:</strong> <span id="temp-message">N/A</span></div>
+    <div id="alert-distancia"><strong>Distancia:</strong> <span id="dist-message">N/A</span></div>
+    <div id="alert-luz"><strong>Luz:</strong> <span id="luz-message">N/A</span></div>
+    <div id="alert-postura"><strong>Postura:</strong> <span id="posture-message">N/A</span></div>
+
+    <script>
+        function fetchAlerts() {
+            $.ajax({
+                url: "{% url 'get_alerts' %}",
+                method: "GET",
+                success: function (data) {
+                    // Actualizar cada contenedor con el mensaje de alerta más reciente
+                    if (data.Temperatura) {
+                        $("#temp-message").text(data.Temperatura.message);
+                    }
+                    if (data.Distancia) {
+                        $("#dist-message").text(data.Distancia.message);
+                    }
+                    if (data.Luz) {
+                        $("#luz-message").text(data.Luz.message);
+                    }
+                    if (data.Postura) {
+                        $("#posture-message").text(data.Postura.message);
+                    }
                 },
                 error: function (error) {
                     console.error("Error al obtener las alertas:", error);

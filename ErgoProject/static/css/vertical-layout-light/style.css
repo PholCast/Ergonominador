@@ -15687,7 +15687,7 @@ a.close.disabled {
 }
 
 .bg-primary, .settings-panel .color-tiles .tiles.primary {
-  background-color: #4B49AC !important;
+  background-color: #ffda00 !important;
 }
 
 a.bg-primary:hover, .settings-panel .color-tiles a.tiles.primary:hover, a.bg-primary:focus, .settings-panel .color-tiles a.tiles.primary:focus,
@@ -15723,7 +15723,7 @@ button.bg-success:focus,
 }
 
 .bg-info, .settings-panel .color-tiles .tiles.info {
-  background-color: #248AFD !important;
+  background-color: #00FF00 !important;
 }
 
 a.bg-info:hover, .settings-panel .color-tiles a.tiles.info:hover, a.bg-info:focus, .settings-panel .color-tiles a.tiles.info:focus,
@@ -15747,7 +15747,7 @@ button.bg-warning:focus,
 }
 
 .bg-danger, .settings-panel .color-tiles .tiles.danger {
-  background-color: #FF4747 !important;
+  background-color:#FF0000 !important;
 }
 
 a.bg-danger:hover, .settings-panel .color-tiles a.tiles.danger:hover, a.bg-danger:focus, .settings-panel .color-tiles a.tiles.danger:focus,
@@ -20214,6 +20214,7 @@ code {
 .card-people .weather-info .location {
   font-size: 20px;
   margin-bottom: 0;
+  margin-top: 12px;
 }
 
 .weather-info {
@@ -21984,7 +21985,7 @@ code {
 }
 
 .card.tale-bg {
-  background: #DAE7FF;
+  background: rgb(245, 247, 255)
 }
 
 .card.transparent {
@@ -28819,9 +28820,10 @@ div.tagsinput span.tag a {
 
 .navbar .navbar-brand-wrapper .navbar-brand img {
   max-width: 100%;
-  height: 34px;
+  height: 70px;
   margin: auto;
   vertical-align: middle;
+  border-radius: 50%;
 }
 
 .navbar .navbar-brand-wrapper .brand-logo-mini {
@@ -28831,6 +28833,7 @@ div.tagsinput span.tag a {
 
 .navbar .navbar-brand-wrapper .brand-logo-mini img {
   width: calc(70px - 30px);
+  height:40px;
   max-width: 100%;
   margin: auto;
 }
@@ -28845,7 +28848,7 @@ div.tagsinput span.tag a {
   padding-right: 2.375rem;
   padding-left: 2.375rem;
   width: calc(100% - 235px);
-  height: 60px;
+  height: 85px;
 }
 
 @media (max-width: 991px) {
@@ -29007,8 +29010,8 @@ div.tagsinput span.tag a {
 }
 
 .navbar .navbar-menu-wrapper .navbar-nav .nav-item.nav-profile img {
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
   border-radius: 100%;
 }
 
