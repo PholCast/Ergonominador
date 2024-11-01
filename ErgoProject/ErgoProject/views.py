@@ -12,8 +12,9 @@ from datetime import datetime, timedelta
 
 def get_alerts(request):
     # Obtener la última alerta de cada tipo usando Max sobre el campo `created_at`
-    latest_alerts = Alert.objects.values('type_alert').annotate(latest_created_at=Max('created_at'))
-    
+    # latest_alerts = Alert.objects.values('type_alert').annotate(latest_created_at=Max('created_at'))
+    latest_alerts = Alert.objects.filter(seen=False).values('type_alert').annotate(latest_created_at=Max('created_at'))
+
     # Filtrar las alertas para obtener los detalles completos de las últimas de cada tipo
     alerts = Alert.objects.filter(
         created_at__in=[alert['latest_created_at'] for alert in latest_alerts]
@@ -23,15 +24,25 @@ def get_alerts(request):
     latest_postura = Postura.objects.order_by('-created_at').first()
 
     # Serializar los datos para cada alerta en el formato requerido
+    # alert_data = {
+    #     alert.type_alert: {
+    #         "type_alert": alert.type_alert,
+    #         "message": alert.message,
+    #         "created_at": alert.created_at.strftime("%H:%M:%S")
+    #     }
+    #     for alert in alerts
+    # }
     alert_data = {
-        alert.type_alert: {
-            "type_alert": alert.type_alert,
-            "message": alert.message,
-            "created_at": alert.created_at.strftime("%H:%M:%S")
-        }
-        for alert in alerts
+    alert.type_alert: {
+        "type_alert": alert.type_alert,
+        "message": alert.message,
+        "created_at": alert.created_at.strftime("%H:%M:%S"),
+        "seen": alert.seen  # Añadir el campo visto
+    }
+    for alert in alerts
     }
 
+    alerts.update(seen=True)
     # Agregar la última postura si existe usando los campos del modelo
     if latest_postura:
         alert_data['Postura'] = {
@@ -83,9 +94,14 @@ def get_sensor_data(request):
     
     verde_count = Postura.objects.filter(semaforo='Verde').count()
 
+    # for dato in semaforo_data:
+    #     tiempos[dato['semaforo']] += dato['total_tiempo']
     for dato in semaforo_data:
-        print(dato['semaforo'])
-        tiempos[dato['semaforo']] += dato['total_tiempo']
+        if dato['semaforo'] == 'AmarilloVerde':
+            tiempos['Amarillo'] += dato['total_tiempo']
+        else:
+            tiempos[dato['semaforo']] += dato['total_tiempo']
+
 
     # Formatear las fechas y los valores
     response_data = {
