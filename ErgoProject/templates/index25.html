@@ -249,8 +249,25 @@
               <i class="icon-grid menu-icon"></i>
               <span class="menu-title">Dashboard</span>
             </a>
-          </li>        
-
+          </li>
+          
+          
+          <li class="nav-item">
+            <a class="nav-link" data-toggle="collapse" href="#charts" aria-expanded="false" aria-controls="charts">
+              <i class="icon-bar-graph menu-icon"></i>
+              <span class="menu-title">Charts</span>
+              <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="charts">
+              <ul class="nav flex-column sub-menu">
+                <li class="nav-item"><a class="nav-link" href="{% url 'chart' %}">ChartJs</a></li>
+              </ul>
+            </div>
+          </li>
+          
+          
+          
+          
           <li class="nav-item">
             <a class="nav-link" href="pages/documentation/documentation.html">
               <i class="icon-paper menu-icon"></i>
@@ -314,7 +331,7 @@
                   </div>
                 </div>
                 <div class="col-md-6 mb-4 stretch-card transparent">
-                  <div class="card card-dark-blue">
+                  <div class="card card-dark-blue" >
                     <div class="card-body">
                       <p class="mb-4">Distancia a la Pantalla</p>
                       <p id ="distancia-pantalla" class="fs-30 mb-2">N/A</p>
@@ -324,7 +341,7 @@
               </div>
               <div class="row">
                 <div class="col-md-6 mb-4 stretch-card transparent">
-                  <div class="card card-rose" id="temperatura-card">
+                  <div class="card card-tale" id="temperatura-card">
                     <div class="card-body">
                       <p  class="mb-4">Alertas de Temperatura</p>
                       <p style ="font-size: 15px" id= "temperatura-alerta"  class="fs-30 mb-2">N/A</p>
@@ -333,7 +350,7 @@
                   </div>
                 </div>
                 <div class="col-md-6 mb-4 stretch-card transparent">
-                  <div class="card card-dark-blue">
+                  <div class="card card-dark-blue" >
                     <div class="card-body">
                       <p class="mb-4">Pausas activas realizadas</p>
                       <p style="text-align:center;margin-top:15px" id ="cantidad_pausas" class="fs-30 mb-2">N/A</p>
@@ -342,6 +359,14 @@
                 </div>
               </div>
               <div class="row">
+                <div class="col-md-6 mb-4 mb-lg-0 stretch-card transparent">
+                  <div id= "postura-alerta" class="card card-success">
+                    <div class="card-body">
+                      <p class="mb-4">Alertas de Postura 🚦</p>
+                      <p style="font-size: 15px" id= "mensaje-postura" class="fs-30 mb-2">Todo en orden, sigue trabajando cómodamente.</p>
+                    </div>
+                  </div>
+                </div>
                 <div class="col-md-6 stretch-card transparent">
                   <div class="card card-light-danger" id="luz-card">
                     <div class="card-body">
@@ -351,15 +376,6 @@
                     </div>
                   </div>
                 </div>
-                <div class="col-md-6 mb-4 mb-lg-0 stretch-card transparent">
-                  <div id= "postura-alerta" class="card card-success">
-                    <div class="card-body">
-                      <p class="mb-4">Alertas de Postura 🚦</p>
-                      <p style="font-size: 15px" id= "mensaje-postura" class="fs-30 mb-2">Todo en orden, sigue trabajando cómodamente.</p>
-                    </div>
-                  </div>
-                </div>
-                
               </div>
             </div>
           </div>
@@ -692,66 +708,68 @@ updateCharts();
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-  function animateCard(cardId) {
-    const card = $("#" + cardId);
-    card.addClass("highlight");
-    setTimeout(() => {
-        card.removeClass("highlight");
-    }, 3000); // Duración de la animación en milisegundos
-}
+    function animateCard(cardId) {
+        const card = $("#" + cardId);
+        card.addClass("highlight");
+        setTimeout(() => {
+            card.removeClass("highlight");
+        }, 3000); // Duración de la animación en milisegundos
+    }
 
-  function fetchLatestAlerts() {
-      $.ajax({
-          url: "{% url 'get_alerts' %}", // Asegúrate de que 'get_alerts' sea la URL correcta en tus rutas de Django
-          method: "GET",
-          success: function(data) {
-              // Verifica si existe una alerta de "Postura"
-              if (data.Postura) {
-                const semaforo = data.Postura.semaforo;
-                const posturaMensajeDiv = $("#postura-alerta");
-                const posturaMensajeText = $("#mensaje-postura");
+    function fetchLatestAlerts() {
+        $.ajax({
+            url: "{% url 'get_alerts' %}", // Asegúrate de que 'get_alerts' sea la URL correcta en tus rutas de Django
+            method: "GET",
+            success: function(data) {
+                // Verifica si existe una alerta de "Postura"
+                if (data.Postura) {
+                    const semaforo = data.Postura.semaforo;
+                    const posturaMensajeDiv = $("#postura-alerta");
+                    const posturaMensajeText = $("#mensaje-postura");
 
-                // Cambiar el color de fondo y el mensaje dependiendo del semáforo
-                if ( semaforo === "Verde" semaforo === "Amarillo") {
-                    posturaMensajeDiv.removeClass().addClass("card card-light-blue");
-                    posturaMensajeText.text("Precaución / Advertencia: Es momento de hacer una pausa y cambiar de posición.");
-                } else if (semaforo === "Amarillo") {
-                    posturaMensajeDiv.removeClass().addClass("card card-danger"); // Cambia a la clase correspondiente para rojo
-                    posturaMensajeText.text("Atención urgente: Necesitas cambiar de postura o tomar un descanso inmediato.");
-                } else if (semaforo === "Rojo" || semaforo === "AmarilloVerde") {
-                    posturaMensajeDiv.removeClass().addClass("card card-success"); // Cambia a la clase correspondiente para verde
-                    posturaMensajeText.text("Todo en orden, sigue trabajando cómodamente.");
+                    // Cambiar el color de fondo y el mensaje dependiendo del semáforo
+                    if (semaforo === "Amarillo") {
+                        posturaMensajeDiv.removeClass().addClass("card card-light-blue");
+                        posturaMensajeText.text("Precaución / Advertencia: Es momento de hacer una pausa y cambiar de posición.");
+                    } else if (semaforo === "Rojo") {
+                        posturaMensajeDiv.removeClass().addClass("card card-danger");
+                        posturaMensajeText.text("Atención urgente: Necesitas cambiar de postura o tomar un descanso inmediato.");
+                    } else if (semaforo === "Verde") {
+                        posturaMensajeDiv.removeClass().addClass("card card-success");
+                        posturaMensajeText.text("Todo en orden, sigue trabajando cómodamente.");
+                    }
                 }
+
+                // Verifica si existe una alerta de "Distancia" y actualiza el contenido del <p> correspondiente
+                if (data.Distancia) {
+                    $("#distancia-alerta").text(data.Distancia.message);
+                    $("#fecha-distancia").text(data.Distancia.created_at);
+                    console.log("created_at: "+data.Distancia.created_at)
+                    animateCard("distancia-card"); // Llama a la animación
+                }
+
+                // Verifica si existe una alerta de "Temperatura"
+                if (data.Temperatura) {
+                    $("#temperatura-alerta").text(data.Temperatura.message);
+                    $("#fecha-temperatura").text(data.Temperatura.created_at);
+                    animateCard("temperatura-card"); // Llama a la animación
+                }
+
+                // Verifica si existe una alerta de "Luz"
+                if (data.Luz) {
+                    $("#luz-alerta").text(data.Luz.message);
+                    $("#fecha-luz").text(data.Luz.created_at);
+                    animateCard("luz-card"); // Llama a la animación
+                }
+            },
+            error: function(error) {
+                console.error("Error al obtener las alertas:", error);
             }
-
-              // Verifica si existe una alerta de "Distancia" y actualiza el contenido del <p> correspondiente
-              if (data.Distancia) {
-                  $("#distancia-alerta").text(data.Distancia.message);
-                  $("#fecha-distancia").text(data.Distancia.created_at);
-                  animateCard("distancia-card");
-              }
-
-              // Verifica si existe una alerta de "Temperatura"
-              if (data.Temperatura) {
-                  $("#temperatura-alerta").text(data.Temperatura.message);
-                  $("#fecha-temperatura").text(data.Temperatura.created_at);
-                  animateCard("temperatura-card");
-              }
-
-              // Verifica si existe una alerta de "Luz"
-              if (data.Luz) {
-                  $("#luz-alerta").text(data.Luz.message);
-                  $("#fecha-luz").text(data.Luz.created_at);
-                  animateCard("luz-card"); // Llama a la animación
-              }
-          },
-          error: function(error) {
-              console.error("Error al obtener las alertas:", error);
-          }
-      });
-  }
-  // Llama a fetchLatestAlerts cada 5 segundos
-  setInterval(fetchLatestAlerts, 5000);
+        });
+    }
+    
+    // Llama a fetchLatestAlerts cada 5 segundos
+    setInterval(fetchLatestAlerts, 5000);
 </script>
 </body>
 </html>

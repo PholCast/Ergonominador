@@ -81,13 +81,12 @@ def get_sensor_data(request):
     semaforo_data = Postura.objects.values('semaforo').annotate(total_tiempo=Sum('tiempo'))
     tiempos = { 'Verde': 0, 'Amarillo': 0, 'Rojo': 0 }
     
-    verde_count = 0  # Inicializa el contador para semáforos en verde
+    verde_count = Postura.objects.filter(semaforo='Verde').count()
 
     for dato in semaforo_data:
+        print(dato['semaforo'])
         tiempos[dato['semaforo']] += dato['total_tiempo']
-        if dato['semaforo'] == 'Verde':
-            verde_count += 1  # Incrementa el contador si el semáforo es verde
-    print(verde_count)
+
     # Formatear las fechas y los valores
     response_data = {
         "temp_timestamps": [entry["date"].strftime("%Y-%m-%d %H:%M:%S") for entry in temp_data],

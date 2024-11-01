@@ -22086,6 +22086,17 @@ code {
   background: #96b2fb;
 }
 
+
+.card.card-rose {
+  background: #bd6083;
+  color: #ffffff;
+}
+
+.card.card-rose:hover {
+  background: #d57fa0;
+}
+
+
 .card.card-dark-blue {
   background: #4747A1;
   color: #ffffff;
@@ -22096,12 +22107,12 @@ code {
 }
 
 .card.card-light-blue {
-  background: #7978E9;
+  background: #ffb300;
   color: #ffffff;
 }
 
 .card.card-light-blue:hover {
-  background: #8f8eed;
+  background: #ffc233;
 }
 
 .card.card-danger {
@@ -22123,12 +22134,12 @@ code {
 }
 
 .card.card-light-danger {
-  background: #F3797E;
+  background: #a183d8;
   color: #ffffff;
 }
 
 .card.card-light-danger:hover {
-  background: #f59095;
+  background: #8e6bce;
 }
 
 .card-inverse-primary {

@@ -24,7 +24,7 @@ class Alert(models.Model):
     type_alert = models.CharField(max_length=50) #Distancia, Postura, Temperatura, luz
     message = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
-
+    seen = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.type_alert} -- {self.message} -- {self.created_at}"  # Asegúrate de que la cadena esté cerrada
 

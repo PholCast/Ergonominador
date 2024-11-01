@@ -42,7 +42,7 @@ def on_message(client, userdata, message):
                 Alert.objects.create(created_at=system_time,type_alert="Temperatura", message=f"¡La temperatura es muy baja! : {value}°C")
         case "alertPHOLLEO/luz":
             if value < 20:
-                Alert.objects.create(created_at=system_time,type_alert="Luz", message=f"¡La luz ambiente es muy baja!")
+                Alert.objects.create(created_at=system_time,type_alert="Luz", message=f"¡La luz ambiente es muy baja! Recuerda activar la luz nocturna")
             else:
                 Alert.objects.create(created_at=system_time,type_alert="Luz", message=f"¡La luz ambiente es muy alta!")
         case "alertPHOLLEO/postura/Verde":
@@ -51,6 +51,8 @@ def on_message(client, userdata, message):
             Postura.objects.create(created_at=system_time,tiempo=value, semaforo="Amarillo")
         case "alertPHOLLEO/postura/Rojo":
             Postura.objects.create(created_at=system_time,tiempo=value, semaforo="Rojo")
+        case "alertPHOLLEO/postura/AmarilloVerde":
+            Postura.objects.create(created_at=system_time,tiempo=value, semaforo="AmarilloVerde")
         case _:
             print(f"topic no se encontró o algo así")
 
